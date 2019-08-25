@@ -1,6 +1,7 @@
 package carpetextra.helpers;
 
 import carpetextra.CarpetExtraSettings;
+import carpetextra.utils.FakePlayerEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.dispenser.FallibleItemDispenserBehavior;
 import net.minecraft.block.dispenser.ItemDispenserBehavior;
@@ -19,10 +20,17 @@ import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.tag.BlockTags;
+import net.minecraft.tag.Tag;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPointer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
@@ -37,6 +45,7 @@ public class CarpetDispenserBehaviours
         DispenserBlock.registerBehavior(Items.HOPPER, new MinecartDispenserBehaviour(AbstractMinecartEntity.Type.HOPPER));
         DispenserBlock.registerBehavior(Items.FURNACE, new MinecartDispenserBehaviour(AbstractMinecartEntity.Type.FURNACE));
         DispenserBlock.registerBehavior(Items.TNT, new MinecartDispenserBehaviour(AbstractMinecartEntity.Type.TNT));
+        DispenserBlock.registerBehavior(Items.STICK, new TogglingDispenserBehaviour(BlockTags.BUTTONS));
         Registry.ITEM.forEach(record -> {
             if (record instanceof MusicDiscItem)
             {
@@ -184,6 +193,39 @@ public class CarpetDispenserBehaviours
         protected void playSound(BlockPointer source)
         {
             source.getWorld().playLevelEvent(1000, source.getBlockPos(), 0);
+        }
+    }
+
+    public static class TogglingDispenserBehaviour extends ItemDispenserBehavior {
+
+        private final Tag<Block> tag;
+
+        public TogglingDispenserBehaviour(Tag<Block> tag) {
+            this.tag = tag;
+        }
+        
+        @Override
+        protected ItemStack dispenseSilently(BlockPointer source, ItemStack stack) {
+            World world = source.getWorld();
+            Direction direction = (Direction) source.getBlockState().get(DispenserBlock.FACING);
+            BlockPos pos = source.getBlockPos().offset(direction);
+            BlockState state = world.getBlockState(pos);     
+            if(this.tag.contains(state.getBlock())) {
+                state.activate(
+                    world, 
+                    new FakePlayerEntity(world, "dispenser"),
+                    Hand.MAIN_HAND,
+                    new BlockHitResult(
+                        new Vec3d(new Vec3i(pos.getX(), pos.getY(), pos.getZ())), 
+                        direction, 
+                        pos,
+                        false
+                    )
+                );
+                return stack;
+            }       
+
+            return super.dispenseSilently(source, stack);
         }
     }
 }
