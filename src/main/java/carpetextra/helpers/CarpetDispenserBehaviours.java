@@ -20,10 +20,7 @@ import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.tag.BlockTags;
-import net.minecraft.tag.Tag;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPointer;
 import net.minecraft.util.math.BlockPos;
@@ -202,12 +199,17 @@ public class CarpetDispenserBehaviours
         
         @Override
         protected ItemStack dispenseSilently(BlockPointer source, ItemStack stack) {
+            if(!CarpetExtraSettings.dispensersToggleThings) {
+                return super.dispenseSilently(source, stack);
+            }
+
             World world = source.getWorld();
             if(player == null) player = new FakePlayerEntity(world, "toggling");
             if(player.world.equals(world)) player.setWorld(world);
             Direction direction = (Direction) source.getBlockState().get(DispenserBlock.FACING);
             BlockPos pos = source.getBlockPos().offset(direction);
             BlockState state = world.getBlockState(pos);     
+
             if(state != null) {
                 state.activate(
                     world, 

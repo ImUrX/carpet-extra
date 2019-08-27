@@ -64,5 +64,8 @@ public class CarpetExtraSettings
             category = {EXTRA, FEATURE}
     )
     public static boolean dispensersPlayRecords = false;
+
+    @Rule(desc = "Dispensers can toggle with a stick things like buttons, doors, repeaters", category = {EXTRA, EXPERIMENTAL, FEATURE})
+    public static boolean dispensersToggleThings = false;
     
 }
