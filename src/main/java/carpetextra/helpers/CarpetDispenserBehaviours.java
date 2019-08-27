@@ -45,7 +45,7 @@ public class CarpetDispenserBehaviours
         DispenserBlock.registerBehavior(Items.HOPPER, new MinecartDispenserBehaviour(AbstractMinecartEntity.Type.HOPPER));
         DispenserBlock.registerBehavior(Items.FURNACE, new MinecartDispenserBehaviour(AbstractMinecartEntity.Type.FURNACE));
         DispenserBlock.registerBehavior(Items.TNT, new MinecartDispenserBehaviour(AbstractMinecartEntity.Type.TNT));
-        DispenserBlock.registerBehavior(Items.STICK, new TogglingDispenserBehaviour(BlockTags.BUTTONS));
+        DispenserBlock.registerBehavior(Items.STICK, new TogglingDispenserBehaviour());
         Registry.ITEM.forEach(record -> {
             if (record instanceof MusicDiscItem)
             {
@@ -198,22 +198,20 @@ public class CarpetDispenserBehaviours
 
     public static class TogglingDispenserBehaviour extends ItemDispenserBehavior {
 
-        private final Tag<Block> tag;
-
-        public TogglingDispenserBehaviour(Tag<Block> tag) {
-            this.tag = tag;
-        }
+        FakePlayerEntity player;
         
         @Override
         protected ItemStack dispenseSilently(BlockPointer source, ItemStack stack) {
             World world = source.getWorld();
+            if(player == null) player = new FakePlayerEntity(world, "toggling");
+            if(player.world.equals(world)) player.setWorld(world);
             Direction direction = (Direction) source.getBlockState().get(DispenserBlock.FACING);
             BlockPos pos = source.getBlockPos().offset(direction);
             BlockState state = world.getBlockState(pos);     
-            if(this.tag.contains(state.getBlock())) {
+            if(state != null) {
                 state.activate(
                     world, 
-                    new FakePlayerEntity(world, "dispenser"),
+                    player,
                     Hand.MAIN_HAND,
                     new BlockHitResult(
                         new Vec3d(new Vec3i(pos.getX(), pos.getY(), pos.getZ())), 
