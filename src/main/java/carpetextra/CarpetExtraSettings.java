@@ -71,4 +71,6 @@ public class CarpetExtraSettings
     )
     public static boolean accurateBlockPlacement = false;
     
+    @Rule(desc = "Dispensers can feed animals", category = {EXTRA, EXPERIMENTAL, FEATURE})
+    public static boolean dispensersFeedAnimals = false;
 }
