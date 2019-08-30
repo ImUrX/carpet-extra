@@ -266,7 +266,10 @@ public class CarpetDispenserBehaviours
                 );
                 if(bool) return stack;
             }
-          
+            return super.dispenseSilently(source, stack);
+        }
+    }
+
     public static class FeedAnimalDispenserBehavior extends ItemDispenserBehavior {
 
         @Override
